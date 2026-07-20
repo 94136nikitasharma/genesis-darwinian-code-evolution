@@ -1,62 +1,137 @@
-# GENESIS — Darwinian Code Evolution Engine
+# GENESIS
 
-GENESIS is a web application that applies biological evolution to code. Powered by OpenAI gpt-4o-mini, it breeds, mutates, and evolves optimal algorithms through natural selection. Watch code organisms compete, crossover, and mutate in real-time to discover solutions no human would write.
+### A Darwinian Code Evolution Engine
 
-Created for the **OpenAI Build Week 2026** (Developer Tools track).
+Most AI coding tools stop after generating code. GENESIS starts there.
 
-## Features
+Rather than requesting one answer from a model, GENESIS creates a population of executable programs, evaluates them, and evolves subsequent generations through selection, mutation, AST-aware crossover, novelty, and elitism. Every retained program has inspectable code, measurable fitness, and traceable ancestry.
 
-- **AI Mutation Engine:** Uses OpenAI gpt-4o-mini to intelligently mutate and recombine JavaScript functions.
-- **Darwinian Selection:** Evaluates code organisms based on correctness (unit tests) and performance (execution time).
-- **Interactive Visualization:** D3.js force-directed graph to visualize population relationships, ancestry, and fitness in real-time.
-- **Live Code Inspector:** Click on any organism to view its source code, syntax highlighting, and test execution details.
-- **Problem Library:** Preset algorithms to evolve (Sorting, Fibonacci, String Matching, Flattening) with varying difficulty.
-- **Dark Glassmorphism UI:** Stunning aesthetic optimized for developer experience with animations and neon glow effects.
+Built for **OpenAI Build Week 2026**.
 
-## Setup Instructions
+## Why GENESIS
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repo-url>
-   cd genesis
-   ```
+Experienced engineers improve software through iteration: write a version, test it, benchmark it, preserve what works, and combine useful ideas. GENESIS applies that loop to code generation.
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+OpenAI `gpt-4o-mini` introduces variation through mutations and novel candidates. The evolution engine—not the model alone—decides what survives.
 
-3. **Environment setup:**
-   Create a `.env.local` file in the root directory and add your OpenAI API key (or you can paste it directly into the UI when running the app):
-   ```
-   OPENAI_API_KEY=sk-your_api_key_here
-   ```
+## What it does
 
-4. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
+- Creates a population of JavaScript functions for a selected algorithmic task.
+- Evaluates every candidate in isolated browser execution with timeout protection.
+- Uses correctness-first fitness: an incorrect program cannot outrank a fully correct one through speed alone.
+- Benchmarks fully correct candidates on identical deterministic inputs and reports median runtime.
+- Preserves elite candidates, creates LLM mutations and novel candidates, and performs AST-aware crossover between compatible parent programs.
+- Retains full organism history, real parent IDs, Hall of Fame entries, and an interactive evolutionary-lineage graph.
+- Lets you inspect a candidate’s source, correctness, benchmark status, median runtime, test results, and ancestry.
 
-5. **Open the app:**
-   Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
+## Architecture
 
-## How it Works
+```mermaid
+flowchart LR
+    UI[React / Next.js UI] --> Engine[Evolution engine]
 
-1. **Initialization:** GENESIS requests GPT to generate a diverse initial population of JavaScript functions attempting to solve the selected problem.
-2. **Evaluation:** Each function runs in isolated browser execution with timeout and is evaluated against test cases. A correctness-first fitness score (0.0 to 1.2) rewards verified performance only after all tests pass.
-3. **Selection:** The top performers ("elites") are preserved for the next generation.
-4. **Crossover & Mutation:** The remaining slots in the new generation are filled by:
-   - **Crossover (🧬):** Combining the best traits of two high-performing parent functions.
-   - **Mutation (⚡):** Intelligently modifying a parent function to optimize it, fix bugs, or try new logic.
-   - **Novel (✨):** Generating completely new approaches to maintain genetic diversity and avoid local maxima.
-5. **Iteration:** The cycle repeats for the configured number of generations while retaining high-fitness candidates and exploring new variants.
+    Engine --> Initial[/api/generate\ninitial population/]
+    Engine --> Evolve[/api/evolve\nnext generation/]
+    Initial --> OpenAI[OpenAI gpt-4o-mini]
+    Evolve --> OpenAI
 
-## Technologies Used
-- Next.js (App Router)
-- React
-- D3.js (Force graphs)
-- OpenAI API (gpt-4o-mini)
-- Vanilla CSS (CSS Modules with CSS Variables for Design System)
+    Evolve --> Mutation[Mutation + novel candidates]
+    Evolve --> AST[AST-aware crossover\nAcorn + Astring]
 
-## License
-MIT
+    Engine --> Worker[Browser Web Worker\nisolated execution with timeout]
+    Worker --> Verify[Correctness validation]
+    Worker --> Bench[Deterministic benchmark inputs\nmedian runtime]
+    Verify --> Fitness[Correctness-first fitness]
+    Bench --> Fitness
+
+    Fitness --> Select[Elitism + parent selection]
+    Select --> History[Retained organism history\nparent-child relationships]
+    History --> Graph[D3 evolutionary lineage]
+    History --> HOF[Hall of Fame]
+    Fitness --> Chart[Fitness history]
+```
+
+## Evolution loop
+
+1. **Initialize** — Generate an initial population for the selected problem.
+2. **Evaluate** — Execute each candidate against functional tests in a browser worker. Mutable benchmark inputs are cloned for each execution.
+3. **Benchmark** — Candidates that pass every correctness test receive the same deterministic performance cases. GENESIS records median runtime and verification status.
+4. **Select** — Sort by correctness-first fitness and preserve elites.
+5. **Vary** — Fill the remaining population with mutually exclusive crossover, mutation, or novel routes. At least 10% of the operation probability is reserved for novel candidates to preserve diversity.
+6. **Record** — Store every organism instance, parent relationship, fitness result, operation type, and Hall of Fame entry.
+
+Average fitness can temporarily decrease because GENESIS deliberately explores new variants. Elitism and the Hall of Fame retain high-fitness discoveries while the population keeps searching.
+
+## Fitness model
+
+Correctness dominates performance:
+
+```text
+if correctness < 1.0: fitness = correctness
+if correctness = 1.0: fitness = 1.0 + 0.2 × performanceScore
+```
+
+This means a fully correct but slower candidate always ranks above an incomplete candidate, regardless of speed.
+
+## Interactive evidence
+
+The application is designed to make its claims visible:
+
+- **Evolutionary Lineage:** Every node is a retained executable program; edges are stored parent-child relationships.
+- **Node types:** 👑 elite, 🧬 crossover, ⚡ mutation, ✨ novel.
+- **Organism Inspector:** Shows source code, correctness, verified benchmark status, median runtime, test results, and lineage selection.
+- **Hall of Fame:** Keeps the strongest verified discoveries across the entire run, not only the final generation.
+- **Evolution Log:** Reports generation operation counts and fitness statistics.
+
+## Tech stack
+
+- Next.js 16 + React 19
+- OpenAI API (`gpt-4o-mini` at runtime)
+- Acorn + Astring for AST-aware crossover
+- Browser Web Workers for candidate execution
+- D3 for lineage visualization
+- Framer Motion and CSS Modules for the interface
+
+## Run locally
+
+### Prerequisites
+
+- Node.js 20+
+- An OpenAI API key with available API billing/quota
+
+### Setup
+
+```bash
+git clone https://github.com/94136nikitasharma/genesis-darwinian-code-evolution.git
+cd genesis-darwinian-code-evolution
+npm install
+```
+
+Create `.env.local`:
+
+```bash
+OPENAI_API_KEY=your_key_here
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Then open [http://localhost:3000](http://localhost:3000).
+
+### Verify the build
+
+```bash
+npm run lint
+npm run build
+```
+
+## Built with Codex
+
+GENESIS was developed iteratively with Codex using **GPT-5.6 Terra** for architecture review, debugging, verification, and refinement of the evolutionary engine. The product uses **gpt-4o-mini** at runtime for mutation and novel-candidate generation.
+
+## Important execution note
+
+Candidate code runs in an **isolated browser execution context with timeout protection**. It is intended to protect the interactive demo from runaway code; it is not presented as a security boundary for untrusted production workloads.
