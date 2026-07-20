@@ -128,9 +128,18 @@ npm run lint
 npm run build
 ```
 
-## Built with Codex
+## How I collaborated with Codex and GPT-5.6 Terra
 
-GENESIS was developed iteratively with Codex using **GPT-5.6 Terra** for architecture review, debugging, verification, and refinement of the evolutionary engine. The product uses **gpt-4o-mini** at runtime for mutation and novel-candidate generation.
+GENESIS was built iteratively with Codex using **GPT-5.6 Terra** as an engineering collaborator. I set the product direction: preserve the existing architecture, prioritize Build Week proof over production features, and make every visible claim defensible in the demo.
+
+Codex accelerated the work in several concrete phases:
+
+1. **Architecture review** — Mapped the React state flow, API routes, browser worker, evolution loop, fitness calculation, AST crossover, graph, Hall of Fame, and export flow before changes were made.
+2. **Incremental engineering** — Helped implement and verify retained genealogy, mutually exclusive evolution routing, deterministic shared benchmark inputs, cloned mutable inputs, correctness-first fitness, model-copy consistency, and pause/resume stability.
+3. **Debugging and verification** — Diagnosed API configuration versus quota issues without exposing credentials, ran live evolution sessions, checked 5-, 20-, and 50-generation behavior, and challenged claims about fitness, crossover, lineage, and benchmark fairness.
+4. **Release preparation** — Helped clean the repository, document the architecture, prepare demo evidence, and refine the story around what GENESIS can honestly prove.
+
+The product uses **gpt-4o-mini at runtime** for mutation and novel-candidate generation. GPT-5.6 Terra was used through Codex during the development, review, debugging, and verification process—not as a hidden runtime dependency.
 
 ## Important execution note
 
